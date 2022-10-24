@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import Seo from 'components/Seo'
+import EditTodo from 'components/EditTodo';
 import { useEffect, useState } from 'react'
 import { getAllTodos, updateTodos, deleteTodos, createTodos } from 'services/todo.service'
 import { AiOutlineCheckCircle, AiOutlineClockCircle, AiOutlinePlusCircle } from 'react-icons/ai';
@@ -24,17 +25,8 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
 } from '@chakra-ui/react'
+import { TodoType } from 'types';
 
-
-
-interface TodoType {
-  id: number;
-  title: string;
-  description: string;
-  done: boolean;
-  taskDateTime: String;
-  durationTime: number;
-}
 
 const Home: NextPage = () => {
 
@@ -47,7 +39,6 @@ const Home: NextPage = () => {
   const parse = (val: any) => val.replace(/^\$/, '')
   const createModal = useDisclosure()
   const editModal = useDisclosure()
-  const key = todos
 
   useEffect(() => {
     const getTodos = async () => {
@@ -65,7 +56,6 @@ const Home: NextPage = () => {
       durationTime: parseInt(durationTime)
     }
     const response = await createTodos(data);
-    console.log(response)
     const getTodos = async () => {
       const response = await getAllTodos();
       setTodos(response);
@@ -109,7 +99,7 @@ const Home: NextPage = () => {
         </div>
 
         {todos.map((todos: TodoType) => (
-          <div key={todos.id} className=' items-center bg-gray-100 rounded flex flex-row shadow p-6 m-4 w-full lg:w-3/4 lg:max-w-lg justify-around'>
+        <div key={todos.id} className=' items-center bg-gray-100 rounded flex flex-row shadow p-6 m-4 w-full lg:w-3/4 lg:max-w-lg justify-around'>
             <div className='w-full flex flex-col items-center'>
               <div className='w-full items-center justify-start'>
                 <h3 className='text-lg'>
@@ -124,7 +114,7 @@ const Home: NextPage = () => {
                   <AiOutlineClockCircle className='mr-2' />
                   {todos.taskDateTime}
                 </span>
-                <span className='ml-4 text-gray-500 flex items-center' >
+                <span className='ml-4 text-gray-500 flex items-center'>
                   <CgSandClock className='mr-2' />
                   {todos.durationTime} m
                 </span>
@@ -132,19 +122,17 @@ const Home: NextPage = () => {
             </div>
             <div className='flex w-1/4 justify-around'>
               <span className='cursor-pointer'>
-                <TfiPencilAlt style={{ fontSize: "22px", color: "#000" }} key={todos.id} onClick={editModal.onOpen}/>
+              <EditTodo id={todos.id} title={todos.title} description={todos.description} taskDateTime={todos.taskDateTime} durationTime={todos.durationTime} done={todos.done}/>
               </span>
-              {
-                todos.done == true ? (
-                  <span className='rounded-full cursor-not-allowed'>
-                    <BsCheckCircleFill style={{ fontSize: "24px", color: "#00a000" }} />
-                  </span>
-                ) : (
-                  <span className='cursor-pointer hover:bg-green-700 rounded-full'>
-                    <AiOutlineCheckCircle style={{ fontSize: "24px", color: "#000" }} onClick={() => isDone(todos)} />
-                  </span>
-                )
-              }
+              {todos.done == true ? (
+                <span className='rounded-full cursor-not-allowed'>
+                  <BsCheckCircleFill style={{ fontSize: "24px", color: "#00a000" }} />
+                </span>
+              ) : (
+                <span className='cursor-pointer hover:bg-green-700 rounded-full'>
+                  <AiOutlineCheckCircle style={{ fontSize: "24px", color: "#000" }} onClick={() => isDone(todos)} />
+                </span>
+              )}
               <span className='cursor-pointer'>
                 <BsFillTrashFill style={{ fontSize: "24px", color: "#FF0000" }} onClick={() => deleteTodo(todos)} />
               </span>
@@ -177,35 +165,6 @@ const Home: NextPage = () => {
             <Button colorScheme='teal' variant='solid' onClick={createTodo}>Adicionar Tarefa</Button>
           </ModalFooter>
         </ModalContent>
-      </Modal>
-
-      <Modal isOpen={editModal.isOpen} onClose={editModal.onClose}>
-        <ModalOverlay />
-          <div>
-            <ModalContent>
-              <ModalHeader>Editar Tarefa</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <FormLabel>Título da Tarefa</FormLabel>
-                <Input placeholder='Título da Tarefa' defaultValue={todos.title} onChange={(e) => setTitle(e.target.value)} />
-                <FormLabel>Descrição da Tarefa</FormLabel>
-                <Input placeholder='Descrição da Tarefa' defaultValue={todos.description} onChange={(e) => setDescription(e.target.value)} />
-                <FormLabel>Data e Hora da Terefa</FormLabel>
-                <Input type="datetime-local" placeholder='Data e Hora da Tarefa' value={todos.taskDateTime.replace(' ','T')} onChange={(e) => setTaskDateTime(e.target.value)} />
-                <FormLabel>Tempo de Duração da Terefa(minutos)</FormLabel>
-                <NumberInput defaultValue={todos.durationTime} min={0} max={240} onChange={(valueString) => setDurationTime(parse(valueString))}>
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-              </ModalBody>
-              <ModalFooter>
-                <Button colorScheme='teal' variant='solid' onClick={createTodo}>Adicionar Tarefa</Button>
-              </ModalFooter>
-            </ModalContent>
-          </div>
       </Modal>
     </>
   )
